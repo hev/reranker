@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/hev/jev-rerank/schema/result.schema.json",
+  "$id": "https://github.com/hev/reranker/schema/result.schema.json",
   "title": "Jev rerank result",
   "type": "array",
   "description": "Documents best-first. `score` is the Noul probability the document is relevant (calibrated, 0..1).",

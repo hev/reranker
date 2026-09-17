@@ -17,8 +17,8 @@ classifiers = [
 dependencies = ["typesafe-sdk>=0.6", "pyyaml>=6"]
 
 [project.urls]
-Repository = "https://github.com/hev/jev-rerank"
-Results = "https://github.com/hev/jev-rerank/blob/main/RESULTS.md"
+Repository = "https://github.com/hev/reranker"
+Results = "https://github.com/hev/reranker/blob/main/RESULTS.md"
 
 [project.optional-dependencies]
 examples = ["rank-bm25"]
