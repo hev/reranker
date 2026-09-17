@@ -16,24 +16,35 @@ judges on BEIR shortlists.
 nDCG@10, every system permuting the same BM25 top-30 shortlist per query. Jev uses the
 domain-neutral phrasing in `prompt.yaml`, untuned per corpus.
 
-| Reranker | SciFact (300 q) | NFCorpus (323 q) | FiQA (300 q) | p50 / p95 per query |
-|---|---|---|---|---|
-| BM25 order, no rerank | 0.667 | 0.310 | 0.234 | |
-| MiniLM-L6 cross-encoder (local) | 0.682 | 0.336 | 0.323 | |
-| Cohere rerank-v3.5 | 0.745 | 0.340 | 0.374 | 129–277 ms / 267–698 ms |
-| Voyage rerank-2.5 | 0.755 | 0.357 | 0.395 | 177–187 ms / 255–300 ms |
-| Claude Haiku 4.5, listwise | 0.723 | | | 2.9 s / 11.6 s |
-| Claude Opus 5 (low effort), listwise | 0.756 | | | 5.0 s / 7.5 s |
-| **Jev, 30 Nouls in one state** | **0.768** | **0.358** | 0.376 | 208–238 ms / 0.8–1.8 s |
-| Jev, one Noul per (query, doc) pair | 0.772 | 0.358 | 0.376 | 122–144 ms per call |
+| Reranker | SciFact (300 q) | NFCorpus (323 q) | FiQA (300 q) | p50 / p95 per query | Cost per 300 q |
+|---|---|---|---|---|---|
+| BM25 order, no rerank | 0.667 | 0.310 | 0.234 | | |
+| MiniLM-L6 cross-encoder (local) | 0.682 | 0.336 | 0.323 | | |
+| Cohere rerank-v3.5 | 0.745 | 0.340 | 0.374 | 129–277 ms / 267–698 ms | $0.60 |
+| Mixedbread mxbai-rerank-large-v2 (hosted) | 0.749 | 0.324 | 0.354 | 322–380 ms / 374–460 ms | $1.05 |
+| Voyage rerank-2.5 | 0.755 | 0.357 | 0.395 | 177–187 ms / 255–300 ms | ~$0.15 |
+| Voyage rerank-3 | 0.755 | 0.357 | 0.402 | 173–192 ms / 285–288 ms | ~$0.15 |
+| gpt-5.6-luna (reasoning off), listwise | 0.747 | 0.355 | 0.363 | 3.1–3.2 s / 3.8–5.8 s | ~$0.71 |
+| Claude Haiku 4.5, listwise | 0.723 | | | 2.9 s / 11.6 s | $4.18 |
+| Claude Opus 5 (low effort), listwise | 0.756 | | | 5.0 s / 7.5 s | $28.40 |
+| **Jev, 30 Nouls in one state** | **0.768** | **0.358** | 0.376 | 208–238 ms / 0.8–1.8 s | $0.13–0.19 |
+| Jev, one Noul per (query, doc) pair | 0.772 | 0.358 | 0.376 | 122–144 ms per call | $0.23–0.30 |
 
-Paired-bootstrap per query: Jev is at or above Cohere on all three corpora (two wins, one
-tie), and trades with Voyage (win, tie, loss). Jev ties Claude Opus 5 at ~1/100 the cost
-and ~1/20 the latency. Full tables, confidence intervals, determinism, position-bias and
+Paired-bootstrap per query, Jev's one-state shape against each reranker: at or above Cohere on
+all three corpora (two wins, one tie); above Mixedbread (two wins, one interval touching zero);
+trading with Voyage, the strongest purpose-built reranker here (edge on SciFact, tie on NFCorpus,
+loss on FiQA by ~0.02); above every LLM used as a reranker on cost and latency, and on quality
+except Opus 5, which it ties at ~1/100 the cost.
+
+The honest one-liner: a general decision model with no reranker training lands in the same
+quality and price bracket as the best purpose-built rerankers, a third of Cohere's price, and
+returns a calibrated probability per document that none of them do. Voyage rerank-3 is as
+good and slightly cheaper; what Jev adds over it is the probability and the fact that the same
+call shape covers routing, classification and extraction gating.
+
+Costs are the runs' actual token usage at list price (Voyage measured from its billed
+`usage.total_tokens`). Full tables, confidence intervals, determinism, position-bias and
 calibration checks: [RESULTS.md](RESULTS.md).
-
-Cost of the 300-query SciFact run at list price: Jev $0.13–0.19 (one-state shapes),
-Cohere ~$0.60, Haiku $4.18, Opus 5 $28.40.
 
 ## Install
 
