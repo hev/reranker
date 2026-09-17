@@ -1,4 +1,4 @@
-# jev-rerank
+# hev-rerank
 
 Use [Jev](https://docs.typesafe.ai), TypeSafe's System One decision model, as a reranker.
 One call carries the query and up to 30 candidate documents; the model answers one
@@ -6,7 +6,7 @@ question per document, in parallel: *is this document relevant to the query?* Th
 a calibrated probability, so the score is both a sort key (rerank) and an absolute
 threshold (prune).
 
-This repo is the whole recipe: the [prompt](jev_rerank/prompt.yaml), the request
+This repo is the whole recipe: the [prompt](hev_rerank/prompt.yaml), the request
 [state shape](schema/state.schema.json), a 90-line Python wrapper, and the
 [results](RESULTS.md) of running it against hosted and open-weight rerankers and LLM
 judges on BEIR shortlists.
@@ -49,14 +49,14 @@ calibration checks: [RESULTS.md](RESULTS.md).
 ## Install
 
 ```sh
-pip install jev-rerank        # or: uv add jev-rerank
+pip install hev-rerank        # or: uv add hev-rerank
 export TYPESAFE_API_KEY=...   # https://console.typesafe.ai/settings/keys
 ```
 
 ## Use
 
 ```python
-from jev_rerank import rerank
+from hev_rerank import rerank
 
 hits = rerank(
     "does vitamin D supplementation improve bone density in older adults",
@@ -76,7 +76,7 @@ budget. Scores across calls are comparable because each is an absolute probabili
 
 - **State**: `{"query": ..., "documents": {"D00": {...}, "D01": {...}, ...}}`
   ([schema](schema/state.schema.json)).
-- **Questions**: one `Noul` per document id, from [`prompt.yaml`](jev_rerank/prompt.yaml).
+- **Questions**: one `Noul` per document id, from [`prompt.yaml`](hev_rerank/prompt.yaml).
   All questions in a request are evaluated in parallel, so 30 documents cost about the same
   wall time as 5.
 - **Score**: the Noul probability. Calibration on the SciFact run: documents scored ≥ 0.9

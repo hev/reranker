@@ -1,11 +1,24 @@
 [project]
-name = "jev-rerank"
+name = "hev-rerank"
 version = "0.1.0"
 description = "Use Jev (TypeSafe's System One model) as a calibrated reranker: one call, up to 30 documents, a probability per document."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
+authors = [{ name = "Adam Hevenor" }]
+keywords = ["reranker", "search", "retrieval", "jev", "typesafe", "rag"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Indexing",
+]
 dependencies = ["typesafe-sdk>=0.6", "pyyaml>=6"]
+
+[project.urls]
+Repository = "https://github.com/hev/jev-rerank"
+Results = "https://github.com/hev/jev-rerank/blob/main/RESULTS.md"
 
 [project.optional-dependencies]
 examples = ["rank-bm25"]
@@ -14,5 +27,8 @@ examples = ["rank-bm25"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = [".claude/", "dist/"]
+
 [tool.hatch.build.targets.wheel]
-packages = ["jev_rerank"]
+packages = ["hev_rerank"]

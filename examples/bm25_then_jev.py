@@ -1,6 +1,6 @@
 """First-stage BM25 over a handful of passages, then Jev reranks the shortlist."""
 from rank_bm25 import BM25Okapi
-from jev_rerank import rerank
+from hev_rerank import rerank
 
 passages = [
     {"title": "Vitamin D and bone density", "text": "Randomised trial: supplementation raised bone mineral density in adults over 65."},
