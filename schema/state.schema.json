@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hev/jev-rerank/schema/state.schema.json",
+  "title": "Jev rerank request state",
+  "description": "The `state` object sent to POST https://api.typesafe.ai/v1/systemone. One Noul question per key of `documents` (see prompt.yaml); question ids match the document keys.",
+  "type": "object",
+  "required": ["query", "documents"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {"type": "string", "description": "The search query or claim."},
+    "documents": {
+      "type": "object",
+      "description": "Candidate documents keyed D00, D01, ... in shortlist order.",
+      "propertyNames": {"pattern": "^D[0-9]{2,}$"},
+      "additionalProperties": {
+        "oneOf": [
+          {"type": "string"},
+          {"type": "object", "properties": {"title": {"type": "string"}, "text": {"type": "string"}}, "additionalProperties": true}
+        ]
+      }
+    }
+  }
+}

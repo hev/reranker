@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hev/jev-rerank/schema/result.schema.json",
+  "title": "Jev rerank result",
+  "type": "array",
+  "description": "Documents best-first. `score` is the Noul probability the document is relevant (calibrated, 0..1).",
+  "items": {
+    "type": "object",
+    "required": ["index", "score"],
+    "properties": {
+      "index": {"type": "integer", "minimum": 0, "description": "Position in the input document list."},
+      "score": {"type": "number", "minimum": 0, "maximum": 1}
+    }
+  }
+}
