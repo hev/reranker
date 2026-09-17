@@ -1,4 +1,6 @@
-# hev-rerank
+# hev reranker
+
+A reranker built on Jev, by hev.
 
 Use [Jev](https://docs.typesafe.ai), TypeSafe's System One decision model, as a reranker.
 One call carries the query and up to 30 candidate documents; the model answers one
