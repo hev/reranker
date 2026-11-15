@@ -2,7 +2,8 @@
 
 Decision models as rerankers: one call, any model, any request shape.
 
-Notebooks: [hosted walkthrough](notebooks/hosted_walkthrough.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/hosted_walkthrough.ipynb)
+Notebooks, companions to the talk *Decision Models as Rerankers* (each request shape by hand, as on the slides,
+then with `rerank()`): [hosted walkthrough](notebooks/hosted_walkthrough.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/hosted_walkthrough.ipynb)
 · [free Colab GPU, no keys](notebooks/colab_free_tier.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/colab_free_tier.ipynb)
 
 ```python
