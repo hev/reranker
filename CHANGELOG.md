@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Notebooks only, no package change (they still install `@v0.3.0`): both notebooks now follow the talk *Decision
+  Models as Rerankers*. Part A builds the three request shapes by hand on the slides' vitamin-D example (the slides'
+  exact `typesafe_sdk` code on Jev in the hosted notebook; the same typed questions sent straight to
+  `pplx-decider-flash-v1.3`'s reference code in the free-tier one). Part B repeats them with `rerank()` and shows
+  the same order, then SciFact, the choice-threshold error and a custom prompt. `notebooks/build.py` refuses to
+  overwrite an executed notebook without `--force`.
+
 ## 0.3.0 (2026-11-15)
 
 - Self-hosted decision models: `rerank(query, docs, model="local:<hf-id>", style=...)` runs open weights in-process
