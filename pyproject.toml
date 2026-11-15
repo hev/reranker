@@ -1,7 +1,7 @@
 [project]
 name = "hev-rerank"
-version = "0.2.0"
-description = "Decision models as rerankers: Jev, Perplexity, Cloudflare Clef and OpenAI Decisions in pair, batch or choice shape, one call."
+version = "0.3.0"
+description = "Decision models as rerankers: Jev, Perplexity, Cloudflare Clef and OpenAI Decisions in pair, batch or choice shape, one call; or open-weight decision models self-hosted with transformers."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -22,6 +22,9 @@ Results = "https://github.com/hev/reranker/blob/main/RESULTS.md"
 
 [project.optional-dependencies]
 examples = ["rank-bm25"]
+# Self-hosted decision models (model="local:<hf-id>"). Versions follow the checkpoints' own requirements
+# (pplx-decider v1.3: torch 2.14, transformers 5.17). Not needed for the hosted models.
+local = ["torch>=2.14", "torchvision>=0.29", "transformers>=5.17,<6", "safetensors>=0.6", "huggingface-hub>=1.0", "pillow"]
 
 [build-system]
 requires = ["hatchling"]

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0 (2026-11-15)
+
+- Self-hosted decision models: `rerank(query, docs, model="local:<hf-id>", style=...)` runs open weights in-process
+  with `transformers`, GPU or CPU, in pair, batch, choice or auto, with the same prompts and request shape as the
+  hosted Perplexity and Clef providers. Supported: Perplexity deciders (`perplexity-ai/pplx-decider-flash-v1.3`,
+  the default for `"local:"`, and `pplx-decider-v1.3`) and Cloudflare Clef (`Cloudflare/clef-flash`,
+  `Cloudflare/clef`), each through the inference code its repository ships.
+- New optional extra: `pip install "hev-rerank[local]"` (torch, transformers, huggingface-hub). The plain install
+  is unchanged and does not pull torch or transformers; they are imported only on the first local call.
+- `style="auto"` for local models is the best shape rerank-bench measured for those weights (`LOCAL_AUTO`:
+  choice for the Perplexity deciders, pair for Clef), else batch. The hosted `MODELS` table is unchanged.
+- On GPUs without bfloat16 (T4, free Colab) weights load in float16. `hev_rerank.local.load()` takes `device`,
+  `dtype`, `mode` and loader options (e.g. a 4-bit `quantization_config` for Clef); pass the result as `client=`.
+- Local batch requests that run out of GPU memory are split in half and retried; local pair sends all of a
+  query's pair requests to the model as one padded list.
+- Notebooks: `notebooks/hosted_walkthrough.ipynb` (every hosted model and shape on SciFact, calibration, the
+  choice-threshold error, a custom prompt) and `notebooks/colab_free_tier.ipynb` (no keys, free Colab T4),
+  committed with executed outputs; `scripts/t4/` launches and terminates the g4dn.xlarge used to execute it.
+
 ## 0.2.0 (2026-11-15)
 
 - `rerank(query, docs, model=..., style=...)` covers every decision model in the
