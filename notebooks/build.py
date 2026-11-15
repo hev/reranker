@@ -1,6 +1,6 @@
 """Writes the two notebooks in this directory (unexecuted). Edit here, rerun, then execute them:
 
-    python notebooks/build.py
+    python notebooks/build.py [colab_free_tier.ipynb | hosted_walkthrough.ipynb]   # default: both
     papermill notebooks/colab_free_tier.ipynb notebooks/colab_free_tier.ipynb -p HEV_RERANK_REF <sha>   # on a T4
     papermill notebooks/hosted_walkthrough.ipynb notebooks/hosted_walkthrough.ipynb -p HEV_RERANK_REF <sha>
 """
@@ -137,6 +137,9 @@ print(f"GPU: {gpu}, {torch.cuda.get_device_properties(0).total_memory / 2**30:.1
 
 The first call downloads the weights into the Hugging Face cache (8.5 GB) and loads them on the GPU. After that
 every `rerank(..., model="local:...")` call reuses the loaded model. No token is needed: the weights are public.
+On the first request `transformers` warns that `causal_conv1d` and `flash-linear-attention` are not installed and
+it falls back to plain PyTorch. That's expected here: on a T4, `flash-linear-attention` measured slower than the
+fallback.
 """),
     code('''
 import time
@@ -358,7 +361,9 @@ def run(model, style):
         t = time.perf_counter()
         hits = rerank(queries[q], [corpus[d] for d in shortlists[q]], model=model, style=style)
         return q, hits, time.perf_counter() - t
-    with ThreadPoolExecutor(4) as ex:              # four queries in flight; pair fans out further inside rerank()
+    # Four queries in flight for batch and choice; pair already sends 8 calls at a time per query, so one query
+    # at a time there keeps under the providers' rate limits.
+    with ThreadPoolExecutor(1 if style == "pair" else 4) as ex:
         return list(ex.map(one, qids))
 
 results, scores = {}, {}
@@ -454,6 +459,10 @@ for m in MODELS:
 
 
 if __name__ == "__main__":
-    write("colab_free_tier.ipynb", FREE, gpu=True)
-    write("hosted_walkthrough.ipynb", HOSTED)
+    import sys
+    which = sys.argv[1:] or ["colab_free_tier.ipynb", "hosted_walkthrough.ipynb"]
+    if "colab_free_tier.ipynb" in which:
+        write("colab_free_tier.ipynb", FREE, gpu=True)
+    if "hosted_walkthrough.ipynb" in which:
+        write("hosted_walkthrough.ipynb", HOSTED)
     print("wrote", *sorted(p.name for p in HERE.glob("*.ipynb")))
