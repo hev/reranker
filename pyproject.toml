@@ -1,12 +1,12 @@
 [project]
 name = "hev-rerank"
-version = "0.1.0"
-description = "Use Jev (TypeSafe's System One model) as a calibrated reranker: one call, up to 30 documents, a probability per document."
+version = "0.2.0"
+description = "Decision models as rerankers: Jev, Perplexity, Cloudflare Clef and OpenAI Decisions in pair, batch or choice shape, one call."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
 authors = [{ name = "Adam Hevenor" }]
-keywords = ["reranker", "search", "retrieval", "jev", "typesafe", "rag"]
+keywords = ["reranker", "search", "retrieval", "jev", "typesafe", "perplexity", "cloudflare", "openai", "decision-model", "rag"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -14,7 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Text Processing :: Indexing",
 ]
-dependencies = ["typesafe-sdk>=0.6", "pyyaml>=6"]
+dependencies = ["typesafe-sdk>=0.7", "httpx>=0.27", "pyyaml>=6"]
 
 [project.urls]
 Repository = "https://github.com/hev/reranker"
@@ -32,3 +32,10 @@ exclude = [".claude/", "dist/"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["hev_rerank"]
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: real API calls; skipped without the provider keys"]
