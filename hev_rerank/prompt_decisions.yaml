@@ -1,0 +1,11 @@
+# Perplexity, Cloudflare Clef and OpenAI Decisions share this prompt: the rerank-bench `generic`
+# variant for those models (clef_rerank.VARIANTS["generic"]), the wording they were benchmarked with.
+# Same keys as prompt.yaml. OpenAI's API has no `criteria` field, so the criteria are appended to
+# each predicate's instructions there, as the benchmark did.
+version: generic-decisions-1
+question: "Does document `documents.{id}` directly answer or address `query`, including evidence that supports or contradicts it?"
+pair_question: "Does the document directly answer or address the query, including evidence that supports or contradicts it?"
+choice_question: "Which document most directly answers or addresses the query, including supporting or contradicting evidence?"
+criteria:
+  "true": "The document directly answers or addresses the query. Evidence that supports OR contradicts a claim is relevant; agreement is not required."
+  "false": "The document is only topically related or does not address the specific query. Disagreement alone does not make evidence irrelevant."

@@ -1,8 +1,12 @@
-# The whole "prompt" for using Jev as a reranker. One Noul question per candidate document,
-# all candidates in one state, evaluated in parallel by the model. Domain-neutral phrasing:
+# Jev's prompt: the rerank-bench `generic` variant (jev_prompts.GENERIC). Domain-neutral phrasing:
 # on SciFact / NFCorpus / FiQA it matched or beat a corpus-tailored phrasing (see RESULTS.md).
+#   question         batch: one Noul per document id, all documents in one state
+#   pair_question    pair: one Noul per (query, document) call
+#   choice_question  choice: one Choice over the document ids
 version: generic-1
 question: "Document `documents.{id}` is relevant to `query`: it contains information that answers or directly addresses it."
+pair_question: "The document is relevant to the query: it contains information that answers or directly addresses it."
+choice_question: "Which document in `documents` best answers or most directly addresses `query`?"
 criteria:
   "true": "The document contains information that answers the query or directly addresses what it asks about."
   "false": "The document is only loosely related, on a similar topic, or does not address what the query asks."
