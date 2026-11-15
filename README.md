@@ -2,6 +2,9 @@
 
 Decision models as rerankers: one call, any model, any request shape.
 
+Notebooks: [hosted walkthrough](notebooks/hosted_walkthrough.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/hosted_walkthrough.ipynb)
+· [free Colab GPU, no keys](notebooks/colab_free_tier.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/colab_free_tier.ipynb)
+
 ```python
 from hev_rerank import rerank
 
@@ -55,6 +58,42 @@ This repo is the whole recipe: the prompts ([Jev](hev_rerank/prompt.yaml),
 [the others](hev_rerank/prompt_decisions.yaml)), the request [state shape](schema/state.schema.json),
 one small module per vendor behind [`rerank()`](hev_rerank/rerank.py), and the [results](RESULTS.md)
 of running Jev against hosted and open-weight rerankers and LLM judges on BEIR shortlists.
+
+## Self-hosted: `model="local:<hf-id>"`
+
+```sh
+pip install "hev-rerank[local]"     # adds torch, transformers; the plain install never pulls them
+```
+
+```python
+hits = rerank(query, docs, model="local:perplexity-ai/pplx-decider-flash-v1.3", style="batch")
+```
+
+Downloads open weights from Hugging Face and runs them in-process with `transformers`, on the GPU if there is
+one, with the same prompts and request shape as the hosted Perplexity and Clef providers. No key. The first call
+loads the model; later calls reuse it. `"local:"` alone is the default model below. Supported checkpoints run
+through the inference code their repos ship:
+
+| `model=` | Weights | Licence | Fits | `auto` picks |
+|---|---|---|---|---|
+| `"local:perplexity-ai/pplx-decider-flash-v1.3"` (default) | 4B, 8.5 GB | Apache-2.0 | free Colab T4 (float16) | choice (the only shape benchmarked on it: 0.502 three-corpus mean, hosted) |
+| `"local:perplexity-ai/pplx-decider-v1.3"` | 27B | Apache-2.0 | 80 GB GPU | choice (0.511 vs batch 0.507, pair 0.495) |
+| `"local:Cloudflare/clef-flash"` | 9B | Apache-2.0 | L4 / A100 (bf16) | pair |
+| `"local:Cloudflare/clef"` | 27B | Apache-2.0 | L4 in 4-bit, or 80 GB | pair |
+
+Unmeasured checkpoints get `auto` = batch. For control over device, dtype or 4-bit loading, load the model yourself
+and pass it as the client:
+
+```python
+from hev_rerank import local
+m = local.load("Cloudflare/clef", quantization_config=BitsAndBytesConfig(load_in_4bit=True))
+rerank(query, docs, model="local:Cloudflare/clef", client=m)
+```
+
+On GPUs without bfloat16 (T4) weights load in float16. Batch requests that run out of GPU memory are split in half
+and retried (batch scores are absolute); choice can't be split and raises `ProviderError`. Pair sends every
+(query, document) request to the model in one padded list. Self-hosted latency depends on your GPU and is not
+comparable with the hosted APIs': [colab_free_tier.ipynb](notebooks/colab_free_tier.ipynb) measures it on a T4.
 
 ## Jev against purpose-built rerankers
 
@@ -150,8 +189,8 @@ corpus should ask per-document Nouls. Perplexity and OpenAI measured the other w
 
 ## Limits
 
-- All five models are hosted APIs: the data leaves your environment. OpenAI Decisions is a public
-  beta; its numbers may shift.
+- The five named models are hosted APIs: the data leaves your environment (use `local:` to keep it in).
+  OpenAI Decisions is a public beta; its numbers may shift.
 
 Jev specifically:
 

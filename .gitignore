@@ -3,3 +3,4 @@ __pycache__/
 dist/
 *.egg-info/
 .claude/
+.t4-state/
