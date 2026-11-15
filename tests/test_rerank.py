@@ -169,7 +169,8 @@ def test_batch_splits_long_lists(server, model):
 def test_batch_splits_on_state_chars(server):
     docs = ["x" * 400] * 5
     rerank(Q, docs, max_state_chars=1000)
-    assert [len(b["questions"]) for b in server.bodies()] == [2, 2, 1]
+    # chunks go out concurrently, so arrival order isn't fixed
+    assert sorted(len(b["questions"]) for b in server.bodies()) == [1, 2, 2]
 
 
 @pytest.mark.parametrize("model", ALL_MODELS)
