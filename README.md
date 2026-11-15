@@ -5,7 +5,7 @@ Decision models as rerankers: one call, any model, any request shape.
 ## The talk
 
 *Decision Models as Rerankers*, a guest talk in [AI-Powered Search](https://maven.com/search-school/ai-powered-search),
-Doug Turnbull and Trey Grainger's Maven course (November 23, 2026).
+Doug Turnbull and Trey Grainger's Maven course (November 18, 2026).
 
 - **Slides:** [hevmind.com/decks/decision-models-as-rerankers](https://hevmind.com/decks/decision-models-as-rerankers/)
 - **Notebooks**, companions to the slides: each request shape by hand first, as on the slides, then with `rerank()`.
