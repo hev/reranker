@@ -2,9 +2,20 @@
 
 Decision models as rerankers: one call, any model, any request shape.
 
-Notebooks, companions to the talk *Decision Models as Rerankers* (each request shape by hand, as on the slides,
-then with `rerank()`): [hosted walkthrough](notebooks/hosted_walkthrough.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/hosted_walkthrough.ipynb)
-· [free Colab GPU, no keys](notebooks/colab_free_tier.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/colab_free_tier.ipynb)
+## The talk
+
+*Decision Models as Rerankers*, a guest talk in [AI-Powered Search](https://maven.com/search-school/ai-powered-search),
+Doug Turnbull and Trey Grainger's Maven course (November 23, 2026).
+
+- **Slides:** [hevmind.com/decks/decision-models-as-rerankers](https://hevmind.com/decks/decision-models-as-rerankers/)
+- **Notebooks**, companions to the slides: each request shape by hand first, as on the slides, then with `rerank()`.
+  - [Free Colab GPU, no API keys](notebooks/colab_free_tier.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/colab_free_tier.ipynb): runs an open decision model on a T4 in about 15 minutes.
+  - [Hosted walkthrough](notebooks/hosted_walkthrough.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hev/reranker/blob/main/notebooks/hosted_walkthrough.ipynb): Jev, Perplexity, Clef and OpenAI with your own keys.
+- **Benchmark results:** [hevmind.com/research/rerankers](https://hevmind.com/research/rerankers/) compares every decision model
+  and purpose-built reranker on the same BEIR shortlists: quality, price and latency. Code and raw runs are in
+  [hev/rerank-bench](https://github.com/hev/rerank-bench).
+
+## Quick start
 
 ```python
 from hev_rerank import rerank
@@ -26,21 +37,19 @@ Every model answers *is this document relevant to the query?* in one of three sh
   evaluated in parallel.
 - **choice**: one call that picks the best document; scores are the options' probabilities and sum to one.
 
-`style="auto"` (the default) picks each model's best measured shape: nDCG@10 on BM25 top-30 shortlists
-of SciFact / NFCorpus / FiQA test, generic prompts
-([hevmind.com/research/rerankers](https://hevmind.com/research/rerankers), code in
-[hev/rerank-bench](https://github.com/hev/rerank-bench)).
+`style="auto"` (the default) picks each model's best shape in the benchmark
+([results](https://hevmind.com/research/rerankers/)).
 
-| `model=` | Vendor model | Env vars | pair | batch | choice | `auto` picks | Why |
-|---|---|---|---|---|---|---|---|
-| `"jev"` (default) | TypeSafe `jev-latest` | `TYPESAFE_API_KEY` | 0.772 / 0.358 / 0.376 | **0.768 / 0.358 / 0.376** | 0.760 / 0.316 / 0.358 | batch | ties pair at 1/30 the calls; choice falls behind when many documents are relevant |
-| `"perplexity"` | `pplx-decider-v1-27b` | `PERPLEXITY_API_KEY` | 0.752 / 0.343 / 0.374 | 0.770 / 0.352 / 0.377 | **0.776 / 0.347 / 0.382** | choice | best on SciFact and FiQA, 3–4× faster than batch (p50 0.5 s vs 1.4–2 s) |
-| `"clef"` | Cloudflare `clef` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | **0.759 / 0.345 / 0.379** | | | pair | pair is the shape that works on Clef-flash; the full model was run in pair |
-| `"clef-flash"` | Cloudflare `clef-flash` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | **0.769 / 0.355 / 0.372** | 0.443 / 0.228 / 0.177 | 0.511 / 0.260 / 0.216 | pair | batch and choice lose 0.10–0.33 nDCG |
-| `"openai"` | OpenAI Decisions `gpt-6-luna` (public beta) | `OPENAI_API_KEY` | 0.670 / 0.306 / 0.346 | 0.681 / 0.323 / 0.346 | **0.751 / 0.311 / 0.355** | choice | +0.07 on SciFact, +0.01 on FiQA, −0.01 on NFCorpus |
+| `model=` | Vendor model | Env vars | `auto` picks | Why |
+|---|---|---|---|---|
+| `"jev"` (default) | TypeSafe `jev-latest` | `TYPESAFE_API_KEY` | batch | As good as pair with far fewer calls; choice slips when many documents are relevant |
+| `"perplexity"` | `pplx-decider-v1-27b` | `PERPLEXITY_API_KEY` | choice | Its best shape on quality, and the fastest |
+| `"clef"` | Cloudflare `clef` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | pair | Pair is the shape that works for Clef |
+| `"clef-flash"` | Cloudflare `clef-flash` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | pair | Batch and choice fall below the BM25 order |
+| `"openai"` | OpenAI Decisions `gpt-6-luna` | `OPENAI_API_KEY` | choice | Clearly its best shape |
 
-nDCG@10 per cell: SciFact / NFCorpus / FiQA. Any vendor model id works as `"vendor:model-id"`, e.g.
-`model="perplexity:pplx-decider-v1-27b"` or `model="clef:clef-flash"`; `auto` then uses that vendor's row.
+Any vendor model id works as `"vendor:model-id"`, e.g.
+`model="perplexity:pplx-decider-v1.3"` or `model="clef:clef-flash"`; `auto` then uses that vendor's row.
 Jev goes through `typesafe-sdk`; the others are plain HTTPS (`httpx`). A missing key raises
 `MissingAPIKeyError` naming the variable.
 
@@ -57,8 +66,7 @@ model takes more, or use batch). A one-document choice returns probability 1 wit
 
 This repo is the whole recipe: the prompts ([Jev](hev_rerank/prompt.yaml),
 [the others](hev_rerank/prompt_decisions.yaml)), the request [state shape](schema/state.schema.json),
-one small module per vendor behind [`rerank()`](hev_rerank/rerank.py), and the [results](RESULTS.md)
-of running Jev against hosted and open-weight rerankers and LLM judges on BEIR shortlists.
+and one small module per vendor behind [`rerank()`](hev_rerank/rerank.py).
 
 ## Self-hosted: `model="local:<hf-id>"`
 
@@ -77,8 +85,8 @@ through the inference code their repos ship:
 
 | `model=` | Weights | Licence | Fits | `auto` picks |
 |---|---|---|---|---|
-| `"local:perplexity-ai/pplx-decider-flash-v1.3"` (default) | 4B, 8.5 GB | Apache-2.0 | free Colab T4 (float16) | choice (the only shape benchmarked on it: 0.502 three-corpus mean, hosted) |
-| `"local:perplexity-ai/pplx-decider-v1.3"` | 27B | Apache-2.0 | 80 GB GPU | choice (0.511 vs batch 0.507, pair 0.495) |
+| `"local:perplexity-ai/pplx-decider-flash-v1.3"` (default) | 4B, 8.5 GB | Apache-2.0 | free Colab T4 (float16) | choice |
+| `"local:perplexity-ai/pplx-decider-v1.3"` | 27B | Apache-2.0 | 80 GB GPU | choice |
 | `"local:Cloudflare/clef-flash"` | 9B | Apache-2.0 | L4 / A100 (bf16) | pair |
 | `"local:Cloudflare/clef"` | 27B | Apache-2.0 | L4 in 4-bit, or 80 GB | pair |
 
@@ -96,40 +104,20 @@ and retried (batch scores are absolute); choice can't be split and raises `Provi
 (query, document) request to the model in one padded list. Self-hosted latency depends on your GPU and is not
 comparable with the hosted APIs': [colab_free_tier.ipynb](notebooks/colab_free_tier.ipynb) measures it on a T4.
 
-## Jev against purpose-built rerankers
+## Benchmark results
 
-nDCG@10, every system permuting the same BM25 top-30 shortlist per query. Jev uses the
-domain-neutral phrasing in `prompt.yaml`, untuned per corpus.
+The full comparison lives at **[hevmind.com/research/rerankers](https://hevmind.com/research/rerankers/)**: every decision
+model in every shape against Cohere, Voyage and Mixedbread, all reranking the same BM25 top 30 on SciFact, NFCorpus
+and FiQA, with nDCG@10, price per 1,000 queries and latency. The short version: the best decision models match the
+best purpose-built rerankers, and return a calibrated probability per document that rerankers don't. The write-ups:
 
-| Reranker | SciFact (300 q) | NFCorpus (323 q) | FiQA (300 q) | p50 / p95 per query | Cost per 300 q |
-|---|---|---|---|---|---|
-| BM25 order, no rerank | 0.667 | 0.310 | 0.234 | | |
-| MiniLM-L6 cross-encoder (local) | 0.682 | 0.336 | 0.323 | | |
-| Cohere rerank-v3.5 | 0.745 | 0.340 | 0.374 | 129–277 ms / 267–698 ms | $0.60 |
-| Mixedbread mxbai-rerank-large-v2 (hosted) | 0.749 | 0.324 | 0.354 | 322–380 ms / 374–460 ms | $1.05 |
-| Voyage rerank-2.5 | 0.755 | 0.357 | 0.395 | 177–187 ms / 255–300 ms | ~$0.15 |
-| Voyage rerank-3 | 0.755 | 0.357 | 0.402 | 173–192 ms / 285–288 ms | ~$0.15 |
-| gpt-5.6-luna (reasoning off), listwise | 0.747 | 0.355 | 0.363 | 3.1–3.2 s / 3.8–5.8 s | ~$0.71 |
-| Claude Haiku 4.5, listwise | 0.723 | | | 2.9 s / 11.6 s | $4.18 |
-| Claude Opus 5 (low effort), listwise | 0.756 | | | 5.0 s / 7.5 s | $28.40 |
-| **Jev, 30 Nouls in one state** | **0.768** | **0.358** | 0.376 | 208–238 ms / 0.8–1.8 s | $0.13–0.19 |
-| Jev, one Noul per (query, doc) pair | 0.772 | 0.358 | 0.376 | 122–144 ms per call | $0.23–0.30 |
+- [Hev meets Jev](https://hevmind.com/writing/jev-as-a-reranker/)
+- [Jev has company](https://hevmind.com/writing/jev-has-company/)
+- [OpenAI makes four](https://hevmind.com/writing/openai-makes-four/)
+- [Reranking just got cheaper](https://hevmind.com/writing/perplexity-decider-v1-2/)
 
-Paired-bootstrap per query, Jev's one-state shape against each reranker: at or above Cohere on
-all three corpora (two wins, one tie); above Mixedbread (two wins, one interval touching zero);
-trading with Voyage, the strongest purpose-built reranker here (edge on SciFact, tie on NFCorpus,
-loss on FiQA by ~0.02); above every LLM used as a reranker on cost and latency, and on quality
-except Opus 5, which it ties at ~1/100 the cost.
-
-The honest one-liner: a general decision model with no reranker training lands in the same
-quality and price bracket as the best purpose-built rerankers, a third of Cohere's price, and
-returns a calibrated probability per document that none of them do. Voyage rerank-3 is as
-good and slightly cheaper; what Jev adds over it is the probability and the fact that the same
-call shape covers routing, classification and extraction gating.
-
-Costs are the runs' actual token usage at list price (Voyage measured from its billed
-`usage.total_tokens`). Full tables, confidence intervals, determinism, position-bias and
-calibration checks: [RESULTS.md](RESULTS.md).
+Code and raw runs: [hev/rerank-bench](https://github.com/hev/rerank-bench). Jev's original runs, with confidence
+intervals, determinism, position-bias and calibration checks: [RESULTS.md](RESULTS.md).
 
 ## Install
 
