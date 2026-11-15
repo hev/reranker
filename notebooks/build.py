@@ -106,7 +106,8 @@ a 4B decider distilled from Perplexity's 27B one (Apache-2.0). Its 8.5 GB of wei
 float16 (the T4 has no bfloat16; `hev-rerank` loads float16 there automatically).
 
 **Before you start:** *Runtime → Change runtime type → T4 GPU*. Then *Runtime → Run all*. The whole notebook
-takes about 15 minutes, a third of it installing, downloading and loading the model.
+took 15 and 17 minutes in our two runs on a T4 (an AWS g4dn.xlarge,
+the free-Colab card), 6 to 9 of them installing, downloading and loading the model.
 
 The hosted version (Jev, Perplexity, Cloudflare Clef, OpenAI; needs keys) is
 [hosted_walkthrough.ipynb](https://colab.research.google.com/github/{REPO}/blob/main/notebooks/hosted_walkthrough.ipynb).
