@@ -301,10 +301,14 @@ from pplx_decider import Decider
 
 # T4: no bfloat16. Load the backbone in float16 (bf16 where the GPU has it) and cast the readout head to match.
 dtype = torch.bfloat16 if torch.cuda.is_bf16_supported(including_emulation=False) else torch.float16
-_backbone = pplx_decider.model._backbone
+# Keep the library's original loader in one place, so re-running this cell can't wrap the wrapper.
+_backbone = getattr(pplx_decider.model, "_original_backbone", pplx_decider.model._backbone)
+pplx_decider.model._original_backbone = _backbone
 pplx_decider.model._backbone = lambda path, config, _bf16: _backbone(path, config, dtype)
-decider = Decider.from_pretrained(checkpoint, device="cuda", mode="isolated", locate=False)
-pplx_decider.model._backbone = _backbone
+try:
+    decider = Decider.from_pretrained(checkpoint, device="cuda", mode="isolated", locate=False)
+finally:
+    pplx_decider.model._backbone = _backbone
 decider.readout.to(dtype)
 
 load_seconds = time.perf_counter() - t0
